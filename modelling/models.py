@@ -85,7 +85,7 @@ class PatchProcessor(torch.nn.Module):
         self.model = model
         self.flatten = torch.nn.Flatten()
         self.channel_wise_attention = ChannelWiseAttention(in_channels=128)
-        self.fc = torch.nn.Linear(512, 1)
+        self.fc = torch.nn.Linear(768, 1)
         self.dropout = torch.nn.Dropout(p=0.)
 
     def forward(self, x):
@@ -105,8 +105,8 @@ class PatchProcessorContainer(torch.nn.Module):
         """
         self.extractor_resolution = (512, 256)
         self.patch_nr = 9
-        self.model = timm.create_model("resnet18d", pretrained=True, in_chans=1,
-                                       features_only=True, out_indices=[4])
+        self.model = timm.create_model("convnext_small", pretrained=True, in_chans=1,
+                                       features_only=True, out_indices=[3])
         self.device = device
         self.patch_extractor = kornia.contrib.ExtractTensorPatches(window_size=self.extractor_resolution,
                                                                    stride=self.extractor_resolution)
@@ -151,7 +151,7 @@ class GlobalNet(torch.nn.Module):
     def __init__(self, device):
         super(GlobalNet, self).__init__()
         self.device = device
-        self.conv = ResBlock(in_channels=512, out_channels=512, kernel_size=5, stride=2, padding=2)
+        self.conv = ResBlock(in_channels=768, out_channels=768, kernel_size=5, stride=2, padding=2)
         self.relu = nn.ReLU()
         self.cwa = ChannelWiseAttention(in_channels=24 * 12)
         self.flatten = torch.nn.Flatten()
@@ -195,9 +195,9 @@ class RSNANet(torch.nn.Module):
         self.device = device
         self.global_net = GlobalNet(device)
         self.patch_container = PatchProcessorContainer(device)
-        self.attention_module = MilAttention(input_size=512)
-        self.fc_patches = nn.Linear(512, 1)
-        self.fc_global = nn.Linear(1024, 1)
+        self.attention_module = MilAttention(input_size=768)
+        self.fc_patches = nn.Linear(768, 1)
+        self.fc_global = nn.Linear(1536, 1)
         self.dropout = nn.Dropout(p=0.)
         self.gray = Gray()
 
