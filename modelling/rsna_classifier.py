@@ -27,7 +27,7 @@ class RsnaClassifier(LightningModule):
         """
         RSNA output is : y, y_patches, salient_map
         """
-        y_global, y_patches = self.forward(x)
+        y_global, y_patches, _ = self.forward(x)
         loss_pred = self.loss(y_global, y)
         y_pred = torch.sigmoid(y_global)
         y_tgt = y
@@ -41,7 +41,7 @@ class RsnaClassifier(LightningModule):
         """
         RSNA output is : y_global, y_patches
         """
-        y_global, y_patches = self.forward(x)
+        y_global, y_patches, _ = self.forward(x)
         pred = torch.sigmoid(y_global)
         loss_pred = self.loss(y_global, y)
         self.val_pfbeta.update(pred, y)
@@ -73,13 +73,13 @@ class RsnaClassifier(LightningModule):
             {
                 "scheduler": ReduceLROnPlateau(
                     optimizer,
-                    mode="min",
-                    factor=0.2,
+                    mode="max",
+                    factor=0.1,
                     patience=1,
                     cooldown=0,
                     min_lr=1e-8,
                 ),
-                "monitor": "val_loss",
+                "monitor": "val_pf_beta",
                 "interval": "epoch",
                 "reduce_on_plateau": True,
                 "frequency": 1,

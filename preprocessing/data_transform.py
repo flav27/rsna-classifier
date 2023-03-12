@@ -9,7 +9,6 @@ from tqdm.auto import tqdm
 
 
 class DataTransform:
-
     """
     Pre-Process DICOM files with the following methods:
         - photometric-interpretation:
@@ -83,23 +82,26 @@ class DataTransform:
 
     @staticmethod
     def _windowing(img, scan):
-        function = scan.VOILUTFunction
-        if type(scan.WindowWidth) == list:
-            center = scan.WindowCenter[0]
-            width = scan.WindowWidth[0]
-        else:
-            center = scan.WindowCenter
-            width = scan.WindowWidth
-        y_range = 2 ** scan.BitsStored - 1
-        if function == 'SIGMOID':
-            img = y_range / (1 + np.exp(-4 * (img - center) / width))
-        else:  # LINEAR
-            below = img <= (center - width / 2)
-            above = img > (center + width / 2)
-            between = np.logical_and(~below, ~above)
-            img[below] = 0
-            img[above] = y_range
-            img[between] = ((img[between] - center) / width + 0.5) * y_range
+        try:
+            function = scan.VOILUTFunction
+            if type(scan.WindowWidth) == list:
+                center = scan.WindowCenter[0]
+                width = scan.WindowWidth[0]
+            else:
+                center = scan.WindowCenter
+                width = scan.WindowWidth
+            y_range = 2 ** scan.BitsStored - 1
+            if function == 'SIGMOID':
+                img = y_range / (1 + np.exp(-4 * (img - center) / width))
+            else:  # LINEAR
+                below = img <= (center - width / 2)
+                above = img > (center + width / 2)
+                between = np.logical_and(~below, ~above)
+                img[below] = 0
+                img[above] = y_range
+                img[between] = ((img[between] - center) / width + 0.5) * y_range
+        except Exception as e:
+            print(f"Windowing Error! {e}")
         return img
 
     @staticmethod
@@ -114,15 +116,11 @@ class DataTransform:
         file_path = row['in_file_paths']
         scan = dicomsdl.open(file_path)
         img = scan.pixelData()
-        try:
-            img = self._fix_photometric_interpretation(img, scan)
-            img = self._windowing(img, scan)
-            img = self._normalize_to_255(img)
-            img = self._crop(img)
-            img = self._resize(img)
-        except:
-            img = np.zeros((self.HEIGHT, self.WIDTH), np.uint8)
-            print("Encountered exception in process_and_save_image !!!")
+        img = self._fix_photometric_interpretation(img, scan)
+        img = self._windowing(img, scan)
+        img = self._normalize_to_255(img)
+        img = self._crop(img)
+        img = self._resize(img)
         cv2.imwrite(row['out_file_paths'], img)
 
     def _resize(self, image):
