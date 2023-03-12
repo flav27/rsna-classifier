@@ -11,7 +11,7 @@ from torchvision.transforms import transforms
 from tqdm.auto import tqdm
 
 from datasets.single_image_dataset import SingleImageDataset
-from grouped_stratified_k_fold_binary import GroupStratifiedShuffleSplitBinary
+from utils.grouped_stratified_k_fold_binary import GroupStratifiedShuffleSplitBinary
 
 
 def generate_splits(df, n_splits=4):
