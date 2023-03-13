@@ -7,9 +7,8 @@ Dataset:
     Total unique patients: 11913
     Total unique images: 54706
 
-For each patient there are multiple images of the L or R breast having MLO(mediolateral oblique) and CC(craniocaudal) views.
-The prediction required can be summarized as this: 
-for each patient predict the probability of cancer for each of the breasts.
+For each patient there are multiple images of the L or R breast having MLO(mediolateral oblique) and CC(craniocaudal) views and 
+The requirement is to predict the probability of cancer for each of the patients breasts.
 
 - imbalanced dataset with only 1158 images containing cancer from the total of 54706.
 - cancer size is very small relative to mammography
@@ -40,6 +39,7 @@ Patient2 Processed Image:
 
 Neural Network Overview:
 
+<img height="512" src="resources/Network Architecture.PNG" width="512"/>
 
 
 
