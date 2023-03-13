@@ -51,7 +51,9 @@ Description:
 - concat global feature vector and patch feature vector to be used for BCE loss and prediction
 
 
+Results:
 
+-LB Score 0.33 using single fold CV
 
 
 
