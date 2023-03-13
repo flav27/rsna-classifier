@@ -24,10 +24,15 @@ torch.cuda.manual_seed_all(SEED)
 torch.backends.cudnn.deterministic = True
 
 
-def generate_data(train_csv_path, input_image_path, out_images_path, data_preprocess=True):
+def generate_data(train_csv_path, input_image_path, out_images_path, data_preprocess=False, debug=False):
     dt = DataTransform(data=pd.read_csv(train_csv_path), in_path=input_image_path, out_path=out_images_path)
     if data_preprocess:
         dt.pre_process_and_save()
+    if debug:
+        data = dt.data
+        data = data[data['out_file_paths'].apply(os.path.exists)]
+        data = data.head(2000)
+        return data
     return dt.data
 
 
@@ -57,10 +62,10 @@ def train_and_evaluate_model(data, train_folds, out_model_path, train_fold_id):
     ])
 
     train_dataset = SingleImageDataset(data=train_data, image_transform=train_transforms)
-    train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True,
-                                  pin_memory=False, num_workers=0, drop_last=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True,
+                                  pin_memory=False, num_workers=2, drop_last=True)
     val_dataset = SingleImageDataset(data=val_data, image_transform=val_image_transforms)
-    val_dataloader = DataLoader(val_dataset, batch_size=2, shuffle=False, num_workers=0)
+    val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=0)
 
     lr_logger = LearningRateMonitor()
 
@@ -97,44 +102,19 @@ def train_and_evaluate_model(data, train_folds, out_model_path, train_fold_id):
         val_dataloaders=val_dataloader,
     )
 
-    model = PredictModel(model_path=model_path, model_cls=RsnaClassifier)
+    model = PredictModel(model_paths=[model_path], model_cls=RsnaClassifier)
     model.inference(val_data)
     model.calculate_thresholds()
 
 
-def generate_data(train_csv_path, input_image_path, out_images_path, data_preprocess=False, debug=False):
-    dt = DataTransform(data=pd.read_csv(train_csv_path), in_path=input_image_path, out_path=out_images_path)
-    if data_preprocess:
-        dt.pre_process_and_save()
-    if debug:
-        data = dt.data
-        data = data[data['out_file_paths'].apply(os.path.exists)]
-        data = data.head(2000)
-        return data
-    return dt.data
-
-
-# if __name__ == '__main__':
-#     TRAIN_CSV_PATH = "/kaggle/input/rsna-breast-cancer-detection/train.csv"
-#     IN_IMAGE_PATH = "/kaggle/input/rsna-breast-cancer-detection/train_images"
-#     OUT_IMAGES_PATH = "/kaggle/working/rsna_png_1536/transformed_data"
-#     OUT_MODEL_PATH = "/kaggle/working/rsna_classifier/"
-#     CV_SPLITS = 5
-#
-#     data = generate_data(TRAIN_CSV_PATH, IN_IMAGE_PATH, OUT_IMAGES_PATH)
-#     train_folds = generate_splits(data, CV_SPLITS)
-#     train_fold_id = 0
-#     OUT_MODEL_PATH = f"/kaggle/working/rsna_classifier/train_fold_id_{train_fold_id}"
-#     train_and_evaluate_model(data, train_folds, OUT_MODEL_PATH, train_fold_id)
-
 if __name__ == '__main__':
-    TRAIN_CSV_PATH = "E:/kaggle/RSNAScreeningMammography/data/train.csv"
-    IN_IMAGE_PATH = "/home/jovyan/workspace/kaggle/train_images"
-    OUT_IMAGES_PATH = "E:/kaggle/RSNAScreeningMammography/data/transformed_data"
+    TRAIN_CSV_PATH = "/kaggle/input/rsna-breast-cancer-detection/train.csv"
+    IN_IMAGE_PATH = "/kaggle/input/rsna-breast-cancer-detection/train_images"
+    OUT_IMAGES_PATH = "/kaggle/working/rsna_png_1536/transformed_data"
     CV_SPLITS = 3
 
-    data = generate_data(TRAIN_CSV_PATH, IN_IMAGE_PATH, OUT_IMAGES_PATH, debug=True)
+    data = generate_data(TRAIN_CSV_PATH, IN_IMAGE_PATH, OUT_IMAGES_PATH)
     train_folds = generate_splits(data, CV_SPLITS)
     train_fold_id = 0
-    OUT_MODEL_PATH = f"/home/jovyan/workspace/kaggle/runs/train_fold_id_{train_fold_id}"
+    OUT_MODEL_PATH = f"/kaggle/working/rsna_classifier/train_fold_id_{train_fold_id}"
     train_and_evaluate_model(data, train_folds, OUT_MODEL_PATH, train_fold_id)

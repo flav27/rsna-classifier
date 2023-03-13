@@ -37,51 +37,16 @@ class PredictModel:
         return model
 
     def inference(self, dataset):
-        if self.debug:
-            predict_df, dataset = self.inference_debug(dataset)
-        else:
-            predict_df, dataset = self.inference_submission(dataset)
-        return predict_df, dataset
-
-    def inference_debug(self, dataset):
         val_image_transforms = transforms.Compose([
             transforms.Resize((1536, 768), interpolation=transforms.InterpolationMode.BILINEAR, antialias=True),
             transforms.ToTensor(),
         ])
-        val_dataset = SingleImageDataset(data=dataset, image_transform=val_image_transforms, submission=False)
+        val_dataset = SingleImageDataset(data=dataset, image_transform=val_image_transforms)
         data_loader = DataLoader(val_dataset, batch_size=4, num_workers=0, shuffle=False, drop_last=False)
         data_dict = {'index': [], 'predictions': []}
         progress_bar = tqdm(desc="Predict", unit=" batches", total=len(data_loader))
         with torch.no_grad():
             for train_data, _ in data_loader:
-                train_data = {key: data.cuda() for key, data in train_data.items()}
-                model_predictions = []
-                for model in self.model:
-                    predictions, _, _ = model(train_data)
-                    predictions = torch.sigmoid(predictions)
-                    predictions = predictions.cpu().numpy()
-                    model_predictions.append(predictions)
-                # compute the average predictions across all models
-                avg_predictions = np.mean(model_predictions, axis=0)
-                data_dict['index'].extend(list(train_data['index'].cpu().numpy()))
-                data_dict['predictions'].extend(list(avg_predictions.flatten()))
-                progress_bar.update()
-        predict_df = pd.DataFrame.from_dict(data_dict)
-        dataset.to_csv(self.dataset_name)
-        predict_df.to_csv(self.raw_predictions)
-        return predict_df, dataset
-
-    def inference_submission(self, dataset):
-        val_image_transforms = transforms.Compose([
-            transforms.Resize((1536, 768), interpolation=transforms.InterpolationMode.BILINEAR, antialias=True),
-            transforms.ToTensor(),
-        ])
-        val_dataset = SingleImageDataset(data=dataset, image_transform=val_image_transforms, submission=True)
-        data_loader = DataLoader(val_dataset, batch_size=4, num_workers=0, shuffle=False, drop_last=False)
-        data_dict = {'index': [], 'predictions': []}
-        progress_bar = tqdm(desc="Predict", unit=" batches", total=len(data_loader))
-        with torch.no_grad():
-            for train_data in data_loader:
                 train_data = {key: data.cuda() for key, data in train_data.items()}
                 model_predictions = []
                 for model in self.model:
@@ -150,12 +115,5 @@ class PredictModel:
         self.threshold = best_pf_beta_threshold
         print(f"best threshold {best_pf_beta_threshold} pf_beta {pf_beta_max}")
 
-    def submission(self, dataset):
-        assert self.threshold
-        predict_df, dataset_df = self.inference(dataset)
-        submission_df = self.generate_raw_predictions(predict_df, dataset_df)
-        submission_df['cancer'] = submission_df['cancer'].apply(lambda x: 1 if x > self.threshold else 0)
-        submission_df = submission_df.reset_index(drop=True)
-        submission_df.to_csv("/kaggle/working/submission.csv", index=False)
 
 
