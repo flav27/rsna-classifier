@@ -5,3 +5,13 @@
 .idea/workspace.xml
 .idea/inspectionProfiles/profiles_settings.xml
 .idea/inspectionProfiles/Project_Default.xml
+datasets/__pycache__/single_image_dataset.cpython-37.pyc
+**/*.cpython-37..pyc
+**/*.cpython-37..pyc
+modelling/__pycache__/models.cpython-37.pyc
+modelling/__pycache__/predict_model.cpython-37.pyc
+preprocessing/__pycache__/data_transform.cpython-37.pyc
+modelling/__pycache__/rsna_classifier.cpython-37.pyc
+utils/__pycache__/metrics.cpython-37.pyc
+utils/__pycache__/grouped_stratified_k_fold_binary.cpython-37.pyc
+utils/__pycache__/utils.cpython-37.pyc

@@ -46,7 +46,7 @@ def train_and_evaluate_model(data, train_folds, out_model_path, train_fold_id):
 
     train_transforms = transforms.Compose([
         transforms.Resize((1536, 768), interpolation=transforms.InterpolationMode.BILINEAR, antialias=True),
-        transforms.ColorJitter(brightness=0.15, contrast=0.15, saturation=0, hue=0),
+        transforms.ColorJitter(brightness=0.2, contrast=0.2, saturation=0, hue=0),
         transforms.RandomHorizontalFlip(p=0.5),
         transforms.ToTensor()
     ])
@@ -57,10 +57,10 @@ def train_and_evaluate_model(data, train_folds, out_model_path, train_fold_id):
     ])
 
     train_dataset = SingleImageDataset(data=train_data, image_transform=train_transforms)
-    train_dataloader = DataLoader(train_dataset, batch_size=32, shuffle=True,
-                                  pin_memory=False, num_workers=2, drop_last=True)
+    train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True,
+                                  pin_memory=False, num_workers=0, drop_last=True)
     val_dataset = SingleImageDataset(data=val_data, image_transform=val_image_transforms)
-    val_dataloader = DataLoader(val_dataset, batch_size=64, shuffle=False, num_workers=0)
+    val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=0)
 
     lr_logger = LearningRateMonitor()
 
@@ -70,7 +70,7 @@ def train_and_evaluate_model(data, train_folds, out_model_path, train_fold_id):
         dirpath=model_path,
         filename="best_model",
         verbose=True,
-        monitor='val_pfbeta',
+        monitor='val_pf_beta',
         mode='max',
         save_on_train_epoch_end=False)
 
@@ -78,10 +78,10 @@ def train_and_evaluate_model(data, train_folds, out_model_path, train_fold_id):
         f"{out_model_path}/{train_fold_id}")
     trainer = Trainer(
         logger=tb_logger,
-        max_epochs=25,
+        max_epochs=12,
         gpus=1,
         callbacks=[lr_logger, checkpoint_callback],
-        accumulate_grad_batches=2,
+        accumulate_grad_batches=4,
         precision=16
     )
 
@@ -128,14 +128,13 @@ def generate_data(train_csv_path, input_image_path, out_images_path, data_prepro
 #     train_and_evaluate_model(data, train_folds, OUT_MODEL_PATH, train_fold_id)
 
 if __name__ == '__main__':
-    TRAIN_CSV_PATH = "E:/kaggle/RSNAScreeningMammography/data/train.csv"
-    IN_IMAGE_PATH = "E:/kaggle/RSNAScreeningMammography/data/train_images"
-    OUT_IMAGES_PATH = "E:/kaggle/RSNAScreeningMammography/data/transformed_data"
-    OUT_MODEL_PATH = "E:/kaggle/RSNAScreeningMammography/runs"
-    CV_SPLITS = 5
+    TRAIN_CSV_PATH = "/home/jovyan/workspace/kaggle/data/train.csv"
+    IN_IMAGE_PATH = "/home/jovyan/workspace/kaggle/train_images"
+    OUT_IMAGES_PATH = "/home/jovyan/workspace/kaggle/transformed_data"
+    CV_SPLITS = 3
 
-    data = generate_data(TRAIN_CSV_PATH, IN_IMAGE_PATH, OUT_IMAGES_PATH, debug=True)
+    data = generate_data(TRAIN_CSV_PATH, IN_IMAGE_PATH, OUT_IMAGES_PATH, debug=False)
     train_folds = generate_splits(data, CV_SPLITS)
     train_fold_id = 0
-    OUT_MODEL_PATH = f"E:/kaggle/RSNAScreeningMammography/runs/train_fold_id_{train_fold_id}"
+    OUT_MODEL_PATH = f"/home/jovyan/workspace/kaggle/runs/train_fold_id_{train_fold_id}"
     train_and_evaluate_model(data, train_folds, OUT_MODEL_PATH, train_fold_id)

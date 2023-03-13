@@ -68,14 +68,14 @@ class RsnaClassifier(LightningModule):
         self.val_pfbeta.reset()
 
     def configure_optimizers(self):
-        optimizer = AdamW(self.parameters(), lr=1e-4, weight_decay=1e-4)
+        optimizer = AdamW(self.parameters(), lr=1e-4, weight_decay=0)
         schedulers = [
             {
                 "scheduler": ReduceLROnPlateau(
                     optimizer,
                     mode="max",
                     factor=0.1,
-                    patience=1,
+                    patience=3,
                     cooldown=0,
                     min_lr=1e-8,
                 ),
