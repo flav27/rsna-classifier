@@ -34,19 +34,19 @@ I have applied data preprocessing with the following:
 
 Patient1 Raw Images:
 
-<img height="256" src="resources/Patient1Raw.PNG" width="256*4"/>
+<img height="256" src="resources/Patient1Raw.PNG" width="1024"/>
 
 Patient1 Processed Image:
 
-<img height="256" src="resources/Patient1Processed.PNG" width="256*4"/>
+<img height="256" src="resources/Patient1Processed.PNG" width="1024"/>
 
 Patient2 Raw Images:
 
-<img height="256" src="resources/Patient2Raw.PNG" width="256*4"/>
+<img height="256" src="resources/Patient2Raw.PNG" width="1024"/>
 
 Patient2 Processed Image:
 
-<img height="256" src="resources/Patient2Processed.PNG" width="256*4"/>
+<img height="256" src="resources/Patient2Processed.PNG" width="1024"/>
 
 
 
