@@ -57,10 +57,10 @@ def train_and_evaluate_model(data, train_folds, out_model_path, train_fold_id):
     ])
 
     train_dataset = SingleImageDataset(data=train_data, image_transform=train_transforms)
-    train_dataloader = DataLoader(train_dataset, batch_size=16, shuffle=True,
+    train_dataloader = DataLoader(train_dataset, batch_size=2, shuffle=True,
                                   pin_memory=False, num_workers=0, drop_last=True)
     val_dataset = SingleImageDataset(data=val_data, image_transform=val_image_transforms)
-    val_dataloader = DataLoader(val_dataset, batch_size=32, shuffle=False, num_workers=0)
+    val_dataloader = DataLoader(val_dataset, batch_size=2, shuffle=False, num_workers=0)
 
     lr_logger = LearningRateMonitor()
 
@@ -128,12 +128,12 @@ def generate_data(train_csv_path, input_image_path, out_images_path, data_prepro
 #     train_and_evaluate_model(data, train_folds, OUT_MODEL_PATH, train_fold_id)
 
 if __name__ == '__main__':
-    TRAIN_CSV_PATH = "/home/jovyan/workspace/kaggle/data/train.csv"
+    TRAIN_CSV_PATH = "E:/kaggle/RSNAScreeningMammography/data/train.csv"
     IN_IMAGE_PATH = "/home/jovyan/workspace/kaggle/train_images"
-    OUT_IMAGES_PATH = "/home/jovyan/workspace/kaggle/transformed_data"
+    OUT_IMAGES_PATH = "E:/kaggle/RSNAScreeningMammography/data/transformed_data"
     CV_SPLITS = 3
 
-    data = generate_data(TRAIN_CSV_PATH, IN_IMAGE_PATH, OUT_IMAGES_PATH, debug=False)
+    data = generate_data(TRAIN_CSV_PATH, IN_IMAGE_PATH, OUT_IMAGES_PATH, debug=True)
     train_folds = generate_splits(data, CV_SPLITS)
     train_fold_id = 0
     OUT_MODEL_PATH = f"/home/jovyan/workspace/kaggle/runs/train_fold_id_{train_fold_id}"
