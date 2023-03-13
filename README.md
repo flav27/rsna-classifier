@@ -40,7 +40,3 @@ Patient2 Processed Image:
 Neural Network Overview:
 
 <img height="512" src="resources/Network Architecture.PNG" width="1024"/>
-
-
-
-
