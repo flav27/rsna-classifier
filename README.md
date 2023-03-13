@@ -43,13 +43,13 @@ Neural Network Overview:
 
 Description:
 
-- resize image to 1536x768
-- split image in 9 patches of size 512x256 to capture fine details from the original image.
-- for each patch extract a feature map using resnet34, pretrained model, as well as a feature vector obtained through attention module as a replacement for GAP
+- resized image of size 1536x768 is split in 9 patches of size 512x256
+- for each patch extract a feature map using **resnet34**, pretrained model, as well as a feature vector obtained through attention module
 - patch feature vector is used as input to auxiliary BCE loss.
 - the feature maps of the patches are re-assembled to form the global feature map
 - resnet block + attention to form a global feature vector using as input the global feature map
 - concat global feature vector and patch feature vector to be used for BCE loss and prediction
+
 
 
 
