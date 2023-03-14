@@ -26,7 +26,7 @@ class PredictModel:
     def load_model_paths(self, model_paths, model_cls):
         net = torch.nn.ModuleList()
         for i, model_path in enumerate(model_paths):
-            net.append(self.load_model(model_path, model_cls))
+            net.append(self.load_model(f"{model_path}/best_model.ckpt", model_cls))
         return net
 
     @staticmethod
@@ -42,7 +42,7 @@ class PredictModel:
             transforms.ToTensor(),
         ])
         val_dataset = SingleImageDataset(data=dataset, image_transform=val_image_transforms)
-        data_loader = DataLoader(val_dataset, batch_size=4, num_workers=0, shuffle=False, drop_last=False)
+        data_loader = DataLoader(val_dataset, batch_size=64, num_workers=0, shuffle=False, drop_last=False)
         data_dict = {'index': [], 'predictions': []}
         progress_bar = tqdm(desc="Predict", unit=" batches", total=len(data_loader))
         with torch.no_grad():
